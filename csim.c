@@ -22,7 +22,7 @@ struct list_node {
 };
 
 typedef struct {
-    list_node *head;
+    size_t *head;
     list_node *tail;
 } list;
 
@@ -35,29 +35,29 @@ list *list_new() {
     return L;
 }
 
-void list_append(list *L, long long tag) {
+void list_append(list *L, size_t tag) {
     list_node *new_dummy = malloc(sizeof(list_node));
     L->tail->tag = tag;
     L->tail->next = new_dummy;
     L->tail = new_dummy;
 }
 
-void list_prepend(list *L, long long tag) {
+void list_prepend(list *L, size_t tag) {
     list_node *new_node = malloc(sizeof(list_node));
     new_node->tag = tag;
     new_node->next = L->head;
     L->head = new_node;
 }
 
-long long list_delete_head(list *L) {
+size_t list_delete_head(list *L) {
     list_node *tmp = L->head;
-    long long head_tag = tmp->tag;
+    size_t head_tag = tmp->tag;
     L->head = L->head->next;
     free(tmp);
     return head_tag;
 }
 
-void list_delete_by_tag(list *L, long long tag) {
+void list_delete_by_tag(list *L, size_t tag) {
     if (L->head->tag == tag) {
         list_node *tmp = L->head;
         L->head = L->head->next;
@@ -92,32 +92,12 @@ void list_print(list *L) {
 }
 
 typedef list *list_t;
-
-void test_list() {
-    list_t L = list_new();
-    list_append(L, 4);
-    list_append(L, 5);
-    list_append(L, 7);
-    list_print(L);
-    list_prepend(L, 2);
-    list_prepend(L, 1);
-    list_print(L);
-
-    list_delete_by_tag(L, 5);
-    list_delete_by_tag(L, 1);
-    list_print(L);
-    list_delete_head(L);
-    list_delete_head(L);
-    list_delete_head(L);
-    list_print(L);
-}
-
 /* end linked list implementation */
 
 /* type declarations */
 typedef struct {
     int valid;      /* determines whether the line contains valid data */
-    long long tag;  /* uniquely identifies the lines within the set    */
+    size_t tag;  /* uniquely identifies the lines within the set    */
 } cache_line;
 
 typedef struct {
@@ -145,12 +125,12 @@ void print_usage() {
 /* end print utilities */
 
 /* begin address parsing */
-int get_set_index(long long address) {
-    long long mask = ~(0xFFFFFFFF << set_bits);
+int get_set_index(size_t address) {
+    size_t mask = ~(0xFFFFFFFF << set_bits);
     return (address >> block_bits) & mask;
 }
 
-long long get_tag(long long address) {
+size_t get_tag(size_t address) {
     return address >> (set_bits + block_bits);
 }
 /* end address parsing */
@@ -213,9 +193,9 @@ void cache_free(cache_set *C) {
     free(C);
 }
 
-int cache_load(cache_set *C, long long address) {
+int cache_load(cache_set *C, size_t address) {
     int set_index = get_set_index(address);
-    long long tag = get_tag(address);
+    size_t tag = get_tag(address);
     cache_line *lines = C[set_index].cache_lines;
     list_t lru = C[set_index].lru_list;
 
@@ -248,7 +228,7 @@ int cache_load(cache_set *C, long long address) {
     return 0;
 }
 
-int cache_store(cache_set *C, long long address) {
+int cache_store(cache_set *C, size_t address) {
     return cache_load(C, address);
 }
 
@@ -261,7 +241,7 @@ void parse_file(int *hit_count, int *miss_count, int *eviction_count) {
 
     while (fgets(line, sizeof line, trace) != NULL) {
         if (line[0] != ' ') continue;
-        long long addr = strtol(line + 3, NULL, 16);
+        size_t addr = strtol(line + 3, NULL, 16);
         printf("address %lli\n", addr);
         switch (line[1]) {
             case 'L':    /* load data */
@@ -306,9 +286,9 @@ int main(int argc, char **argv) {
         return 1;
     }
     parse_input(argc, argv);
-    int h_c = 0, m_c = 0, e_c = 0;
-	  parse_file(&h_c, &m_c, &e_c); 
-    printSummary(h_c, m_c, e_c);
+    int hit_count= 0, miss_count = 0, eviction_count = 0;
+	  parse_file(&hit_count, &miss_count, &eviction_count); 
+    printSummary(hit_count, miss_count, eviction_count);
 
     return 0;
 }
