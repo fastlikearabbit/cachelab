@@ -17,7 +17,7 @@ static char *trace_path;
 /* begin linked list implementation */
 typedef struct list_node list_node;
 struct list_node {
-    long long tag;
+    size_t tag;
     list_node *next;
 };
 
