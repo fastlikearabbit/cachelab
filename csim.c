@@ -9,9 +9,9 @@
 
 /* constants */
 #define ADDR_SIZE 64
-static int num_lines;
-static int set_bits;
-static int block_bits;
+static size_t num_lines;
+static size_t set_bits;
+static size_t block_bits;
 static char *trace_path;
 
 /* begin linked list implementation */
@@ -125,7 +125,7 @@ void print_usage() {
 /* end print utilities */
 
 /* begin address parsing */
-int get_set_index(size_t address) {
+size_t get_set_index(size_t address) {
     size_t mask = ~(0xFFFFFFFF << set_bits);
     return (address >> block_bits) & mask;
 }
@@ -167,13 +167,13 @@ void parse_input(int argc, char **argv) {
 
 /* begin cache utilities */
 cache_set *cache_init() {
-    int num_sets = pow(2, set_bits);
+    size_t num_sets = pow(2, set_bits);
     cache_set *C = malloc(sizeof(cache_set) * num_sets);
     if (C == NULL) {
         printf("malloc failed \n");
         exit(1);
     }
-    for (int i = 0; i < num_sets; i++) {
+    for (size_t i = 0; i < num_sets; i++) {
         C[i].cache_lines = malloc(num_lines * sizeof(cache_line));
         if (C[i].cache_lines == NULL) {
             printf("malloc failed\n");
@@ -185,8 +185,8 @@ cache_set *cache_init() {
 }
 
 void cache_free(cache_set *C) {
-    int num_sets = pow(2, set_bits);
-    for (int i = 0; i < num_sets; i++) {
+    size_t num_sets = pow(2, set_bits);
+    for (size_t i = 0; i < num_sets; i++) {
         free(C[i].cache_lines);
         list_free(C[i].lru_list);
     }
@@ -194,7 +194,7 @@ void cache_free(cache_set *C) {
 }
 
 int cache_load(cache_set *C, size_t address) {
-    int set_index = get_set_index(address);
+    size_t set_index = get_set_index(address);
     size_t tag = get_tag(address);
     cache_line *lines = C[set_index].cache_lines;
     list_t lru = C[set_index].lru_list;
@@ -207,7 +207,7 @@ int cache_load(cache_set *C, size_t address) {
         }
     }
     /* miss + possible eviction, try first-fit */
-    for (int i = 0; i < num_lines; i++) {
+    for (size_t i = 0; i < num_lines; i++) {
         if (!lines[i].valid) {
             lines[i].valid = 1;
             lines[i].tag = tag;
@@ -215,8 +215,8 @@ int cache_load(cache_set *C, size_t address) {
             return 0;  /* miss */
         }
         if (i == num_lines - 1) { 
-            long long v_tag = list_delete_head(lru);
-            for (int j = 0; j < num_lines; j++) {
+            size_t v_tag = list_delete_head(lru);
+            for (size_t j = 0; j < num_lines; j++) {
                 if (lines[j].tag == v_tag) {
                     lines[j].tag = tag;
                     list_append(lru, tag);
