@@ -22,7 +22,7 @@ struct list_node {
 };
 
 typedef struct {
-    size_t *head;
+    list_node *head;
     list_node *tail;
 } list;
 
