@@ -85,7 +85,7 @@ void list_free(list *L) {
 
 void list_print(list *L) {
     for (list_node *p = L->head; p != L->tail; p = p->next) {
-        printf("%lli --> ", p->tag);
+        printf("%li --> ", p->tag);
         if (p->next == L->tail) printf("NULL");
     }
     printf("\n");
@@ -113,9 +113,9 @@ void print_summary(int hit_count, int miss_count, int eviction_count) {
 }
 
 void print_stats() {
-    printf("Number of set bits: %i\n", set_bits);
-    printf("Number of lines per set: %i\n", num_lines);
-    printf("Number of block bits: %i\n", block_bits);
+    printf("Number of set bits: %li\n", set_bits);
+    printf("Number of lines per set: %li\n", num_lines);
+    printf("Number of block bits: %li\n", block_bits);
     printf("Trace file: %s\n", trace_path);
 }
 
@@ -242,7 +242,7 @@ void parse_file(int *hit_count, int *miss_count, int *eviction_count) {
     while (fgets(line, sizeof line, trace) != NULL) {
         if (line[0] != ' ') continue;
         size_t addr = strtol(line + 3, NULL, 16);
-        printf("address %lli\n", addr);
+        printf("address %li\n", addr);
         switch (line[1]) {
             case 'L':    /* load data */
             case 'S': {  /* store data */
