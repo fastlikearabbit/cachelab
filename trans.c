@@ -22,55 +22,18 @@ int is_transpose(int M, int N, int A[N][M], int B[M][N]);
 char transpose_submit_desc[] = "Transpose submission";
 void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 {
+    /* block size */
     int bsize = 8;
+    
     if (M == 64 && N == 64) bsize = 4;
     int i, j, ii, jj;
-    int extra = 0;
+    int extra = 0;  /* when M or N is not divible by bsize, we need to cover the rest */
     if (M != N) extra = bsize;
     for (ii = 0; ii < N + extra; ii += bsize) {
         for (jj = 0; jj < M + extra; jj += bsize) {
-            // if square, zig-zag transpose
-            int up = 1;
-            if (M == N) { /* assume bsize divides M */
-                for (int k = 0; k < bsize; k++) {
-                    if (up) {
-                        i = ii + k;
-                        j = jj;
-                        while (i >= ii) {
-                            B[i][j] = A[j][i];
-                            i--; j++;
-                        }
-                    } else {
-                        j = jj + k, i = ii;
-                        while (j >= jj) {
-                            B[i][j] = A[j][i];
-                            j--; i++;
-                        }
-                    }
-                    up = !up;
-                }
-                up = 0;
-                for (int k = 1; k < bsize; k++) {
-                    if (!up) {
-                        i = ii + k, j = jj + bsize - 1;
-                        while (i < ii + bsize) {
-                            B[i][j] = A[j][i];
-                            i++; j--;
-                        }
-                    } else {
-                        i = ii + bsize - 1, j = jj + k;
-                        while (j < jj + bsize) {
-                            B[i][j] = A[j][i];
-                            i--; j++;
-                        }
-                    }
-                    up = !up;
-                }                   
-            } else  { 
-                for (i = ii; i < M && i < ii + bsize; i++) {
-                    for (j = jj; j < N && j < jj + bsize; j++) {
-                        B[i][j] = A[j][i];
-                    }
+            for (i = ii; i < M && i < ii + bsize; i++) {
+                for (j = jj; j < N && j < jj + bsize; j++) {
+                    B[i][j] = A[j][i];
                 }
             }
         }
